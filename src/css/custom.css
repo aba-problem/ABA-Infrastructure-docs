@@ -1,0 +1,244 @@
+/* ============================================
+   ABA BRANDING - Docusaurus Custom CSS
+   ============================================ */
+
+:root {
+  /* Primitive Colors */
+  --color-aba-bg: #09090B;
+  --color-aba-bg-secondary: #111217;
+  --color-aba-card: #18181B;
+  --color-aba-card-hover: #1C1C1F;
+  --color-aba-border: #2B2C31;
+  --color-aba-border-subtle: #1F2024;
+  --color-aba-blue-400: #60A5FA;
+  --color-aba-blue-500: #3B82F6;
+  --color-aba-blue-600: #2563EB;
+  --color-aba-blue-700: #1D4ED8;
+  --color-aba-success: #22C55E;
+  --color-aba-warning: #EAB308;
+  --color-aba-danger: #EF4444;
+  --color-aba-text: #F5F5F5;
+  --color-aba-text-secondary: #A1A1AA;
+  --color-aba-text-muted: #71717A;
+
+  --ifm-color-primary: var(--color-aba-blue-500);
+  --ifm-color-primary-dark: var(--color-aba-blue-600);
+  --ifm-color-primary-darker: var(--color-aba-blue-700);
+  --ifm-color-primary-darkest: #1E40AF;
+  --ifm-color-primary-light: var(--color-aba-blue-400);
+  --ifm-color-primary-lighter: #93C5FD;
+  --ifm-color-primary-lightest: #BFDBFE;
+
+  --ifm-code-font-size: 90%;
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-weight: 700;
+}
+
+/* Forzar modo oscuro siempre (opcional, quita esto si quieres soportar modo claro) */
+html {
+  --ifm-background-color: var(--color-aba-bg) !important;
+}
+
+[data-theme='dark'] {
+  --ifm-background-color: var(--color-aba-bg);
+  --ifm-background-surface-color: var(--color-aba-card);
+  --ifm-color-primary: var(--color-aba-blue-500);
+  --ifm-font-color-base: var(--color-aba-text);
+  --ifm-font-color-secondary: var(--color-aba-text-secondary);
+  --ifm-toc-border-color: var(--color-aba-border);
+  --ifm-color-success: var(--color-aba-success);
+  --ifm-color-warning: var(--color-aba-warning);
+  --ifm-color-danger: var(--color-aba-danger);
+  --ifm-navbar-background-color: var(--color-aba-bg-secondary);
+  --ifm-footer-background-color: var(--color-aba-bg-secondary);
+  --ifm-hr-border-color: var(--color-aba-border);
+  --ifm-toc-link-color: var(--color-aba-text-secondary);
+  --docusaurus-highlighted-code-line-bg: rgba(59, 130, 246, 0.15);
+}
+
+/* ============================================
+   FONDO CON GRID (grilla)
+   ============================================ */
+body {
+  background-color: var(--color-aba-bg);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar {
+  background-color: var(--color-aba-bg-secondary);
+  border-bottom: 1px solid var(--color-aba-border);
+  box-shadow: none;
+}
+
+.navbar__link {
+  color: var(--color-aba-text-secondary);
+}
+
+.navbar__link:hover,
+.navbar__link--active {
+  color: var(--color-aba-text);
+}
+
+.navbar__title {
+  color: var(--color-aba-text);
+  font-weight: 700;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.theme-doc-sidebar-container {
+  background-color: var(--color-aba-bg);
+  border-right: 1px solid var(--color-aba-border-subtle);
+}
+
+.menu__link {
+  color: var(--color-aba-text-secondary);
+  border-radius: 6px;
+}
+
+.menu__link:hover {
+  background-color: var(--color-aba-card-hover);
+  color: var(--color-aba-text);
+}
+
+.menu__link--active {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--color-aba-blue-400);
+  font-weight: 600;
+}
+
+/* ============================================
+   CARDS (tarjetas de contenido, admonitions)
+   ============================================ */
+.card,
+.theme-doc-sidebar-menu,
+article {
+  background-color: var(--color-aba-card);
+  border: 1px solid var(--color-aba-border);
+  border-radius: 12px;
+}
+
+.admonition {
+  background-color: var(--color-aba-card);
+  border: 1px solid var(--color-aba-border);
+  border-radius: 8px;
+}
+
+/* ============================================
+   CODE BLOCKS
+   ============================================ */
+div[class^='codeBlockContainer'] {
+  background-color: var(--color-aba-card) !important;
+  border: 1px solid var(--color-aba-border);
+  border-radius: 8px;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.button--primary {
+  background-color: var(--color-aba-blue-500);
+  border-color: var(--color-aba-blue-500);
+}
+
+.button--primary:hover {
+  background-color: var(--color-aba-blue-600);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  background-color: var(--color-aba-bg-secondary);
+  border-top: 1px solid var(--color-aba-border);
+}
+
+.footer__link-item {
+  color: var(--color-aba-text-secondary);
+}
+
+.footer__link-item:hover {
+  color: var(--color-aba-blue-400);
+}
+
+/* ============================================
+   TABLA DE CONTENIDOS (TOC lateral derecho)
+   ============================================ */
+.table-of-contents__link--active {
+  color: var(--color-aba-blue-400);
+}
+
+/* ============================================
+   HERO / LANDING PAGE
+   ============================================ */
+.hero {
+  background-color: var(--color-aba-bg);
+}
+
+.hero__title {
+  color: var(--color-aba-text);
+}
+
+.hero__subtitle {
+  color: var(--color-aba-text-secondary);
+}
+
+.button--primary,
+.button-aba {
+  background: linear-gradient(135deg, var(--color-aba-blue-400, #60A5FA), var(--color-aba-blue-600, #2563EB));
+  border: none;
+  color: #FFFFFF;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 14px 32px;
+  border-radius: 10px;
+  box-shadow:
+    0 0 20px rgba(59, 130, 246, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.button--primary:hover,
+.button-aba:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 30px rgba(59, 130, 246, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+}
+
+.button--primary:active,
+.button-aba:active {
+  transform: translateY(0);
+}
+
+.button--primary::before,
+.button-aba::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.button--primary:hover::before,
+.button-aba:hover::before {
+  left: 100%;
+}
