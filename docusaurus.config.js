@@ -87,7 +87,7 @@ const config = {
       },
       navbar: {
         logo: {
-          alt: "My Site Logo",
+          alt: "Aba LOGO",
           src: "img/descarga.png",
         },
         items: [

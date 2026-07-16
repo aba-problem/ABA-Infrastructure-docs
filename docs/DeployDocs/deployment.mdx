@@ -1,0 +1,349 @@
+# Guía de Configuración: Docusaurus + Firebase Hosting (ABA-PROBLEM)
+
+Esta guía documenta paso a paso cómo se configuró el entorno de documentación con Docusaurus, se desplegó en Firebase Hosting, se conectó un dominio personalizado y se personalizó el branding.
+
+---
+
+## 1. Requisitos previos
+
+- Node.js instalado (v18 o superior recomendado)
+- npm
+- Cuenta de Firebase / Google
+- Firebase CLI instalado globalmente:
+
+```bash
+npm install -g firebase-tools
+```
+
+---
+
+## 2. Crear el proyecto Docusaurus
+
+```bash
+npx create-docusaurus@latest docs classic
+cd docs
+```
+
+Esto genera la estructura base del proyecto, incluyendo:
+
+```
+docs/
+├── blog/
+├── docs/
+├── src/
+│   ├── components/
+│   ├── css/
+│   │   └── custom.css
+│   └── pages/
+│       └── index.js
+├── static/
+│   └── img/
+├── docusaurus.config.js
+├── sidebars.js
+└── package.json
+```
+
+---
+
+## 3. Probar el entorno local
+
+```bash
+npm run start
+```
+
+Levanta el servidor de desarrollo en `http://localhost:3000`.
+
+---
+
+## 4. Compilar el sitio (build)
+
+Antes de desplegar, siempre hay que generar los archivos estáticos:
+
+```bash
+npm run build
+```
+
+Esto crea la carpeta `build/` con todo el sitio compilado (HTML, CSS, JS estáticos).
+
+> **Errores comunes durante el build:**
+> - `ParseError: Identifier directly after number` → suele ser una ruta de Windows (`C:\Users\...`) pegada sin comillas dentro de `docusaurus.config.js`. Todas las rutas dentro del config deben ir entre comillas y ser relativas (ej. `"img/logo.png"`), nunca rutas absolutas del sistema.
+> - `ReferenceError: FeatureList is not defined` → ocurre al editar `src/components/HomepageFeatures/index.js` y borrar el arreglo `FeatureList` sin quitar también el `.map()` que lo usa más abajo. Si se elimina la sección de features, hay que quitar tanto la definición como su uso, o dejar el componente retornando `null`.
+
+---
+
+## 5. Configurar Firebase Hosting
+
+### 5.1 Iniciar sesión
+
+```bash
+firebase login
+```
+
+### 5.2 Inicializar Firebase en el proyecto
+
+```bash
+firebase init hosting
+```
+
+Durante el asistente:
+- Selecciona el proyecto de Firebase (o crea uno nuevo).
+- **Directorio público:** escribe `build` (⚠️ no `public` — Docusaurus compila en `build`, y ese es el error más común: dejar el `firebase.json` apuntando a `public` cuando en realidad no existe o está vacío).
+- Configura como Single Page App: **Sí**.
+- No sobrescribas `index.html` si ya existe.
+
+### 5.3 `firebase.json` final
+
+```json
+{
+  "hosting": {
+    "public": "build",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+```
+
+### 5.4 Desplegar
+
+```bash
+npm run build
+firebase deploy
+```
+
+Si todo sale bien, verás:
+
+```
++  Deploy complete!
+Hosting URL: https://tu-proyecto.web.app
+```
+
+> Si ves la pantalla de bienvenida por defecto de Firebase ("Firebase Hosting Setup Complete") después de desplegar, significa que el `"public"` en `firebase.json` no apunta a la carpeta `build`, o que no corriste `npm run build` antes de desplegar.
+
+---
+
+## 6. Conectar un dominio personalizado
+
+### 6.1 Agregar el dominio en Firebase
+
+1. Firebase Console → **Hosting** → **Add custom domain**.
+2. Escribe el (sub)dominio, por ejemplo `docs.midominio.com`.
+3. **No marques** la opción de redirección a menos que realmente quieras que ese dominio redirija a otro — si la dejas activada sin completar el campo de destino, causa errores de configuración.
+
+### 6.2 Configurar el DNS
+
+Firebase te da un registro de verificación y luego los registros finales, típicamente:
+
+```
+Tipo:   CNAME
+Nombre: docs (o el subdominio que uses)
+Valor:  tu-proyecto.web.app
+```
+
+**Importante:**
+- Verifica primero **en qué proveedor de DNS está realmente tu dominio**. No basta con editar Cloudflare si el dominio usa otros nameservers (ej. DonDominio, GoDaddy, Namecheap). Para confirmarlo:
+
+```powershell
+Resolve-DnsName tu-dominio.com
+```
+
+Busca en el resultado el campo `NameHost` — ahí ves el proveedor real de DNS que debes editar.
+
+- Si usas **Cloudflare** con el proxy activado (nube naranja 🟠), Firebase no puede completar la validación ACME (SSL) porque Cloudflare intercepta la petición HTTP. Hay que poner el registro en **"DNS only"** (nube gris ☁️) al menos durante la validación inicial.
+- Elimina cualquier registro **A** viejo que apunte a una IP anterior/distinta antes de agregar el CNAME nuevo — dejarlos convivir genera conflictos y el error:
+  ```
+  Falló una o más de las solicitudes HTTP GET de Hosting del desafío de ACME
+  ```
+
+### 6.3 Verificar propagación
+
+```powershell
+Resolve-DnsName docs.tudominio.com
+```
+
+O usando [dnschecker.org](https://dnschecker.org).
+
+Una vez el DNS resuelve correctamente, Firebase reintenta la validación automáticamente y el estado pasa de "Pending" a **"Connected"** con el candado SSL activo (puede tardar minutos a horas).
+
+---
+
+## 7. Personalización de marca (branding)
+
+### 7.1 Definir los tokens de color
+
+En `src/css/custom.css`:
+
+```css
+:root {
+  --color-aba-bg: #09090B;
+  --color-aba-bg-secondary: #111217;
+  --color-aba-card: #18181B;
+  --color-aba-card-hover: #1C1C1F;
+  --color-aba-border: #2B2C31;
+  --color-aba-border-subtle: #1F2024;
+  --color-aba-blue-400: #60A5FA;
+  --color-aba-blue-500: #3B82F6;
+  --color-aba-blue-600: #2563EB;
+  --color-aba-blue-700: #1D4ED8;
+  --color-aba-success: #22C55E;
+  --color-aba-warning: #EAB308;
+  --color-aba-danger: #EF4444;
+  --color-aba-text: #F5F5F5;
+  --color-aba-text-secondary: #A1A1AA;
+  --color-aba-text-muted: #71717A;
+}
+```
+
+### 7.2 Mapear a las variables de Docusaurus (Infima)
+
+```css
+[data-theme='dark'] {
+  --ifm-background-color: var(--color-aba-bg);
+  --ifm-background-surface-color: var(--color-aba-card);
+  --ifm-color-primary: var(--color-aba-blue-500);
+  --ifm-font-color-base: var(--color-aba-text);
+  --ifm-font-color-secondary: var(--color-aba-text-secondary);
+  --ifm-toc-border-color: var(--color-aba-border);
+}
+```
+
+### 7.3 Forzar modo oscuro (opcional)
+
+En `docusaurus.config.js`, dentro de `themeConfig`:
+
+```javascript
+colorMode: {
+  defaultMode: "dark",
+  disableSwitch: true,
+  respectPrefersColorScheme: false,
+},
+```
+
+### 7.4 Fondo tipo grid
+
+```css
+body {
+  background-color: var(--color-aba-bg);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+```
+
+### 7.5 Logo personalizado
+
+Los archivos dentro de `static/` se sirven desde la raíz del sitio. Si el logo está en `static/img/logo.png`, en `docusaurus.config.js` se referencia así:
+
+```javascript
+navbar: {
+  logo: {
+    alt: "My Site Logo",
+    src: "img/logo.png",
+  },
+},
+```
+
+⚠️ Nunca usar rutas absolutas de Windows (`C:\Users\...`) ni carpetas fuera de `static/img/`.
+
+### 7.6 Quitar la sección de features del homepage
+
+Para eliminar los ilustraciones/tarjetas por defecto (los dinosaurios de Docusaurus), hay dos opciones:
+
+**Opción simple** — dejar el componente vacío en `src/components/HomepageFeatures/index.js`:
+
+```javascript
+export default function HomepageFeatures() {
+  return null;
+}
+```
+
+**Opción completa** — además, quitar el `import` y el `<HomepageFeatures />` de `src/pages/index.js`.
+
+### 7.7 Estilo de botones
+
+```css
+.button--primary {
+  background: linear-gradient(135deg, var(--color-aba-blue-400), var(--color-aba-blue-600));
+  border: none;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 10px;
+  box-shadow:
+    0 0 20px rgba(59, 130, 246, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+
+.button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 30px rgba(59, 130, 246, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.5);
+}
+```
+
+### 7.8 Footer personalizado
+
+En `docusaurus.config.js`, dentro de `themeConfig`:
+
+```javascript
+footer: {
+  style: "dark",
+  links: [
+    {
+      title: "Docs",
+      items: [{ label: "Getting Started", to: "/docs/intro" }],
+    },
+    {
+      title: "Community",
+      items: [{ label: "GitHub", href: "https://github.com/aba-problem" }],
+    },
+  ],
+  copyright: `Copyright © ${new Date().getFullYear()} ABA-PROBLEM.`,
+},
+```
+
+---
+
+## 8. Flujo de trabajo resumido (checklist de despliegue)
+
+Cada vez que se hace un cambio:
+
+```bash
+# 1. Compilar
+npm run build
+
+# 2. Si el build fue exitoso, desplegar
+firebase deploy
+
+# 3. Verificar en el navegador
+# https://tu-proyecto.web.app
+# o el dominio personalizado configurado
+```
+
+Si `npm run build` falla:
+1. Lee el error completo — casi siempre indica el archivo y línea exactos.
+2. Revisa que no haya rutas de Windows sueltas sin comillas en `docusaurus.config.js`.
+3. Revisa que no haya variables usadas (`.map()`, JSX, etc.) sin definir en los componentes de `src/`.
+4. Si el problema persiste, limpia caché:
+```bash
+npm run clear
+npm run build
+```
+
+---
+
+## 9. Referencias
+
+- Documentación oficial de Docusaurus: https://docusaurus.io/docs
+- Documentación oficial de Firebase Hosting: https://firebase.google.com/docs/hosting
